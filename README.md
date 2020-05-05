@@ -1,6 +1,6 @@
 # LURK-Vecchia
 
-Simultaneous variable seletion and estimation of LUR models with spatiotemporally correlated errors
+Simultaneous variable seletion and estimation of LUR models with spatiotemporally correlated errors that is scalable for big data
 
 # Reference 
 
