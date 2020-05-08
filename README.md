@@ -3,9 +3,10 @@
 Simultaneous variable seletion and estimation of LUR models with spatiotemporally correlated errors that is scalable for big data
 
 # Reference 
+coming soon ... Messier and Katzfuss 
 
 # Installation 
-Heavily based on the package GPvecchia (https://cran.r-project.org/web/packages/GPvecchia/index.html) and
+Based on the package GPvecchia (https://cran.r-project.org/web/packages/GPvecchia/index.html) and
 ncvreg (https://cran.r-project.org/web/packages/ncvreg/index.html). 
 Install the following R packages: GPvecchia,ncvreg, fields, Matrix
 

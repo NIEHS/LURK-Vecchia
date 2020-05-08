@@ -23,6 +23,27 @@ negloglik_full_ST=function(logparms,locs,y,N){
 }
 
 
+################################################################################
+# SCAD Penalty value
+################################################################################
+SCAD_Penalty_Loglike <- function(beta.in,lambda){
+  
+  penalty <- matrix(NA,nrow = nrow(beta.in),ncol = ncol(beta.in))
+  for (j in 1:nrow(beta.in)){
+    beta.j <- beta.in[j,]
+    idx1 <- abs(beta.j)<= lambda
+    idx2 <- abs(beta.j)>lambda & abs(beta.j)<=3.7*lambda
+    idx3 <- abs(beta.j)>3.7*lambda
+    penalty[j,idx1] <- lambda[idx1]*beta.j[idx1]
+    penalty[j,idx2] <- -(abs(beta.j[idx2])^2 - 7.4*lambda[idx2]*abs(beta.j[idx2])+lambda[idx2]^2)/(5.4)
+    penalty[j,idx3] <- (3.7*lambda[idx3]^2 + lambda[idx3]^2)/2
+  }
+  
+  
+  loglik.penalty <- lambda*colSums(penalty)
+  
+  return(loglik.penalty)
+}
 # 
 ################################################################################
 # Ordinary Spatiotemporal Kriging Prediction with a Local S-T neigborhood
@@ -38,7 +59,7 @@ Kr_pred  =  function(new_coords,obs_coords,Y_obs,cov.pars,NN){
   df_obs <- obs_coords_scaled
   
   for (i in 1:nrow(new_coords)){
-    print(i)
+   # print(i)
     locs.test.i <- rep.row(df_new[i,],nrow(df_obs))
     dist.op<- fields::rdist.vec(locs.test.i,df_obs)
     Sigma.op <- cov.pars[1] * fields::Exponential(dist.op,range = 1)
@@ -61,6 +82,37 @@ Kr_pred  =  function(new_coords,obs_coords,Y_obs,cov.pars,NN){
   return(Kr.Data)
 }
 
+
+################################################################################
+# Spatiotemporal Kriging Maximum Likelihood Estiamtion based on an average
+# of multiple random subsets
+################################################################################
+
+ST_Krig_Param_Avg = function(Y,locs,p,k = 10){
+  
+
+n = length(Y)
+mdl.geo.fit.avg <- list()
+mdl.geo.fit.avg <- matrix(NA,nrow=k,ncol = 4)
+
+for (i in 1:k){
+  set.seed(i)
+  OK.fold = sample(1:n,p,replace=FALSE)
+  Y.train = Y[OK.fold]
+  locs.train <- locs[OK.fold,]
+  D.sample = rdist(locs.train[,1:2])
+  t.sample = rdist(locs.train[,3])
+  theta.hat <- c(.9*var(Y.train),mean(D.sample)/4,mean(t.sample)/4,0.1*var(Y.train)) # var,s-range,t-range,nugget
+  full.result<-  optim(par=log(theta.hat),fn=negloglik_full_ST,
+                       locs=locs.train,y=Y.train,N=p,
+                       control=list(trace=FALSE,maxit = 400))
+  mdl.geo.fit.avg[i,] <- full.result$par
+}
+
+covparam <- exp(apply(mdl.geo.fit.avg,2,mean))
+
+return(covparam)
+}
 
 
 ################################################################################
