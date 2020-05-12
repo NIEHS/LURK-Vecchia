@@ -141,8 +141,6 @@ LURK_Full <- function(Y,X,locs,covparams = NULL,beta.hat = NULL, tol = NULL){
   }
   
   
-  if(is.null(m)) m = 25
-  
   ############################################################## 
   ### Initialize variables ##############
   ############################################################## 
