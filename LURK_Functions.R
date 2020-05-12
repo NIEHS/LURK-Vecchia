@@ -121,7 +121,6 @@ LURK_Full <- function(Y,X,locs,covparams = NULL,beta.hat = NULL, tol = NULL){
   #
   #
   #
-  #
   ############################################################## 
   ### Specify default values for optional inputs  ##############
   ############################################################## 
