@@ -15,12 +15,12 @@ library(scoringRules)
 source("U:/Papers/Stats_Paper/varSelection_kyle/GPvecchia_Model_Selection/lurk-vecchia/LURK_Vecchia.R")
 source("U:/Papers/Stats_Paper/varSelection_kyle/GPvecchia_Model_Selection/lurk-vecchia/LURK_Helpers.R")
 
-###### Working directory
-setwd("U:/Papers/Stats_Paper/varSelection_kyle/US_NO2/")
+###### Set the Working directory, if needed
+#setwd()
 
 
 ### DATA #####
-US_NO2_Data<- read.csv("US_NO2_uniqueST_wCovariates_20191001.csv")
+US_NO2_Data<- read.csv("US_ST_NO2_Data.csv")
 
 lat       <- US_NO2_Data$Latitude # Latitude
 lon       <- US_NO2_Data$Longitude # Longitude
