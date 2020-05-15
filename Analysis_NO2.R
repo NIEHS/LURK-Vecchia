@@ -12,8 +12,8 @@ library(readxl)
 library(scoringRules)
 
 
-source("U:/Papers/Stats_Paper/varSelection_kyle/GPvecchia_Model_Selection/lurk-vecchia/LURK_Vecchia.R")
-source("U:/Papers/Stats_Paper/varSelection_kyle/GPvecchia_Model_Selection/lurk-vecchia/LURK_Helpers.R")
+# Example path - needs to be changed for your local machine
+source("U:/Path/to/the/code/LURK_Functions.R")
 
 ###### Set the Working directory, if needed
 #setwd()

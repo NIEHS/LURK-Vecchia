@@ -42,7 +42,7 @@ LURK_Vecchia <- function(Y,X,locs,covparams = NULL,beta.hat = NULL, tol = NULL, 
   while(!converged){
     
     # compute residuals
-    res=Y-Y.hat
+    res=as.double(Y-Y.hat)
     vecchia.approx$zord= res[vecchia.approx$ord]
     
     # estimate theta
@@ -124,9 +124,9 @@ LURK_Full <- function(Y,X,locs,covparams = NULL,beta.hat = NULL, tol = NULL){
   ############################################################## 
   ### Specify default values for optional inputs  ##############
   ############################################################## 
-  N <- length(Y)
+  n <- length(Y)
   if(is.null(covparams)){
-    d.sample <- sample(1:N,N/50,replace = FALSE)
+    d.sample <- sample(1:n,n/50,replace = FALSE)
     D.sample = rdist(locs[d.sample,1:2])
     t.sample = rdist(locs[d.sample,3])
     covparams <- c(.9*var(Y),mean(D.sample)/4,mean(t.sample)/4,0.1*var(Y)) 
@@ -156,12 +156,12 @@ LURK_Full <- function(Y,X,locs,covparams = NULL,beta.hat = NULL, tol = NULL){
   while(!converged){
     
     # compute residuals
-    res=Y-Y.hat
+    res= as.double(Y-Y.hat)
     
     # estimate theta
     
     full.result=optim(par=log(covparams),fn=negloglik_full_ST,
-                      locs= locs, res=res,N=N,method = "Nelder-Mead",
+                      y=res,locs= locs,N=n,method = "Nelder-Mead",
                       control=list(trace=0))
     
     
@@ -171,22 +171,24 @@ LURK_Full <- function(Y,X,locs,covparams = NULL,beta.hat = NULL, tol = NULL){
     # transform data to iid
     locs.scaled = cbind(locs[,1]/covparams[2], locs[,2]/covparams[2], locs[,3]/covparams[3])
     
-    Omega.full <- full.theta.hat[1]*Exponential(rdist(locs.scaled),
-                                                range=1)+full.theta.hat[4]*diag(N)
+    Omega.full <- covparams[1]*Exponential(rdist(locs.scaled),
+                                                range=1)+covparams[4]*diag(n)
     Omega.lc <- solve(t(chol(Omega.full)))
     
     
-    y.tilde=transformed.data[,1]
-    X.tilde=transformed.data[,-1]
+    # Calculate the  transformed X and Y
+    y.tilde <- Omega.lc %*% Y
+    X.tilde <- Omega.lc %*% X
+    
     
     # Estimate betas - Full SCAD fitting
     Full.SCAD.fit=cv.ncvreg(as.matrix(X.tilde),y.tilde,family = "gaussian",
                             penalty = "SCAD",dfmax=100,returnX = FALSE)
     
-    idmin <- which(full.SCAD.fit$lambda == full.SCAD.fit$lambda.min)
-    semin <- full.SCAD.fit$cve[idmin] + full.SCAD.fit$cvse[idmin]
-    lambda.1se <- max(full.SCAD.fit$lambda[full.SCAD.fit$cve<=semin])
-    lambda.1se.idx <- which(full.SCAD.fit$lambda==lambda.1se)
+    idmin <- which(Full.SCAD.fit$lambda == Full.SCAD.fit$lambda.min)
+    semin <- Full.SCAD.fit$cve[idmin] + Full.SCAD.fit$cvse[idmin]
+    lambda.1se <- max(Full.SCAD.fit$lambda[Full.SCAD.fit$cve<=semin])
+    lambda.1se.idx <- which(Full.SCAD.fit$lambda==lambda.1se)
     
     
     ### Betas
