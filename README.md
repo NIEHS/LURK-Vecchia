@@ -14,3 +14,17 @@ Download LURK_Functions.R to your local machine and use R to source:
 ```
 source("/Location/of/your/functions/LURK_Functions.R") 
 ``` 
+
+# Data
+
+###### NO2
+The NO2 analysis data is stored in a single csv file in the [data](https://github.com/NIEHS/LURK-Vecchia/tree/master/data) subfolder. 
+
+```
+source("/Location/of/your/functions/LURK_Functions.R") 
+```
+###### Simulations
+
+# Running the Simulation Analysis 
+
+# Running the NO2 Analysis 
