@@ -17,7 +17,7 @@ source("/Location/of/your/functions/LURK_Functions.R")
 
 # Data
 
-## NO<sub>2</sub>
+###### NO<sub>2</sub>
 The NO<sub>2</sub> analysis data are stored in a single csv file in the [data](https://github.com/NIEHS/LURK-Vecchia/tree/master/data) subfolder. 
 
 ```
@@ -30,7 +30,7 @@ To see all of the field names, call:
 colnames(US_ST_NO2_Data)
 ```
 
-## Simulations
+###### Simulations
 
 The simulation analysis data are stored in Excel files in the [data](https://github.com/NIEHS/LURK-Vecchia/tree/master/data) subfolder. 
 There is an Excel file for each spatiotemporal parameter that is varied: nugget-to-sill ratio, total variance (sill), spatial range, and temporal range.
@@ -52,7 +52,7 @@ Each sheet is simply labeled "1", "2",..., etc. for the simulation scenario.
 The first sheet also contains data for the true observations without measurement error and the covariates. 
 Hence, in each simulation you see differences for the first sheet. 
 
-As an example, we read in the first sheet for the nugget-to-sill simulations: 
+Here we go through an **example** of reading in data and assigning variables to help demonstrate the data format:
 ```
 data1 <- as.data.frame(read_excel("Vecchia_ST_Simulation_NUG2SILL5_20191107.xlsx", 
                                   sheet = "1", col_names = FALSE))
@@ -76,10 +76,9 @@ xyt <- as.matrix(read_excel("Vecchia_ST_Simulation_NUG2SILL5_20191107.xlsx",
                             sheet = "xy", col_names = FALSE))
 
 ```
-The same information is also read in for the test set, which is a 1000 other space-time observations from the same
+The same information is also read in for the test set, which are 1000 other space-time observations from the same
 respective simulation. 
 ```
-# Read in the test set data 
 xy_test <- as.matrix(read_excel("Vecchia_ST_Simulation_NUG2SILL5_test_20191107.xlsx", 
                                 sheet = "1", col_names = FALSE))
 
@@ -88,6 +87,42 @@ test_xyt <- as.matrix(read_excel("Vecchia_ST_Simulation_NUG2SILL5_test_20191107.
 y_test <- as.matrix(xy_test[,1])
 
 X_test <- as.matrix(xy_test[,22:144])
+```
+
+The main simulations go through nested loops: The outer loop (i) goes through each parameter variation (e.g. differing nugget-to-sill ratio). The inner loop (j)
+goes through random simulations of the same parameter values. Example below:
+```
+for (i in 1:20){
+  
+  ### Read in the simulated data
+  Ydata <- read_excel("Vecchia_ST_Simulation_TEMPORAL_RANGES5_20191107.xlsx", 
+                      sheet = as.character(i), col_names = FALSE)
+  
+  test_data <- read_excel("Vecchia_ST_Simulation_TEMPORAL_RANGES5_test_20191107.xlsx", 
+                          sheet = as.character(i), col_names = FALSE)
+```
+The following if-else statement deals with the fact the first sheet contains the true data in column 1.
+
+```
+  
+  if (i == 1){
+    Y.all <- Ydata[,2:21]
+    test_y <- test_data[,2:21]
+  }else{
+    Y.all <- Ydata[,1:20]
+    test_y <- test_data[1:20]
+  }
+  
+````
+Then the inner loop (j) goes through random realizations
+```  
+  for (j in 1:P){
+    
+
+    ########## Observed data for simulation j ############
+    Y.obs <- data.matrix(Y.all[,j])
+    n=length(Y.obs)
+    test_y_j <- data.matrix(test_y[,j])
 ```
 
 # Running the Simulation Analysis 
