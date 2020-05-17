@@ -101,7 +101,7 @@ for (i in 1:20){
   test_data <- read_excel("Vecchia_ST_Simulation_TEMPORAL_RANGES5_test_20191107.xlsx", 
                           sheet = as.character(i), col_names = FALSE)
 ```
-The following if-else statement deals with the fact the first sheet contains the true data in column 1.
+The following if-else statement deals with the true data in column 1 of sheet 1.
 
 ```
   
@@ -144,11 +144,11 @@ The runnable simulation is the first section of Analysis_Simulation.R. The heade
 ## Replicating the paper simulations
 
 The paper simulations have a section for each scenario. 
-Section 2: Variations of the temporal range
-Section 3: Variations of the spatial range
-Section 4: Variations of the nugget-to-sill ratio
-Section 5: Variations of the total variance 
-Section 6: Convergence of estimated LUR coefficients (betas) with increasing m in the Vecchia approximation.
+- Section 2: Variations of the temporal range
+- Section 3: Variations of the spatial range
+- Section 4: Variations of the nugget-to-sill ratio
+- Section 5: Variations of the total variance 
+- Section 6: Convergence of estimated LUR coefficients (betas) with increasing m in the Vecchia approximation.
 
 # Running the NO<sub>2</sub> Analysis 
 
