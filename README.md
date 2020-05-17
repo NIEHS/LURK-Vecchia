@@ -17,7 +17,7 @@ source("/Location/of/your/functions/LURK_Functions.R")
 
 # Data
 
-###### NO<sub>2</sub>
+## NO<sub>2</sub>
 The NO<sub>2</sub> analysis data are stored in a single csv file in the [data](https://github.com/NIEHS/LURK-Vecchia/tree/master/data) subfolder. 
 
 ```
@@ -30,7 +30,7 @@ To see all of the field names, call:
 colnames(US_ST_NO2_Data)
 ```
 
-###### Simulations
+## Simulations
 
 The simulation analysis data are stored in Excel files in the [data](https://github.com/NIEHS/LURK-Vecchia/tree/master/data) subfolder. 
 There is an Excel file for each spatiotemporal parameter that is varied: nugget-to-sill ratio, total variance (sill), spatial range, and temporal range.
@@ -125,6 +125,32 @@ Then the inner loop (j) goes through random realizations
     test_y_j <- data.matrix(test_y[,j])
 ```
 
+
 # Running the Simulation Analysis 
 
+## A runnable simulation example
+The beginning of the simulation contains one iteration of the paper's full simulations. This is
+included so that a user can run a simulation and produce the results in a timely manner. Due to the 
+number of simulations, the full paper simulations will take a long time. Note that the main simulations were sub-divided
+and ran on high-performance computing clusters.
+
+The runnable simulation is the first section of Analysis_Simulation.R. The header of the section starts with:
+```
+####################################################################################################
+### SECTION 1
+### A short simulation scenario that can be run in a few minutes
+```
+
+## Replicating the paper simulations
+
+The paper simulations have a section for each scenario. 
+Section 2: Variations of the temporal range
+Section 3: Variations of the spatial range
+Section 4: Variations of the nugget-to-sill ratio
+Section 5: Variations of the total variance 
+Section 6: Convergence of estimated LUR coefficients (betas) with increasing m in the Vecchia approximation.
+
 # Running the NO<sub>2</sub> Analysis 
+
+With the LURK_Functions sourced and the data accessible, run Analysis_NO2.R to replicate the 10-fold cross-validation
+NO<sub>2</sub> from the paper.
