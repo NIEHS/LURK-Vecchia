@@ -57,6 +57,38 @@ As an example, we read in the first sheet for the nugget-to-sill simulations:
 data1 <- as.data.frame(read_excel("Vecchia_ST_Simulation_NUG2SILL5_20191107.xlsx", 
                                   sheet = "1", col_names = FALSE))
 ```
+The true data, without measurement error is read in:
+
+```
+# y true data
+Y.true <- as.matrix(data1[,1])
+```
+Columns 2 through 21 on the first sheet are the 20 simulation scenarios of y-observed (i.e. with measurement error). 
+The covariates are read in.
+```
+# covariates
+X <- as.matrix(data1[,22:144])
+```
+There is a separate sheet for the spatial coordiantes:
+```
+# longitude and latitude
+xyt <- as.matrix(read_excel("Vecchia_ST_Simulation_NUG2SILL5_20191107.xlsx", 
+                            sheet = "xy", col_names = FALSE))
+
+```
+The same information is also read in for the test set, which is a 1000 other space-time observations from the same
+respective simulation. 
+```
+# Read in the test set data 
+xy_test <- as.matrix(read_excel("Vecchia_ST_Simulation_NUG2SILL5_test_20191107.xlsx", 
+                                sheet = "1", col_names = FALSE))
+
+test_xyt <- as.matrix(read_excel("Vecchia_ST_Simulation_NUG2SILL5_test_20191107.xlsx", 
+                                 sheet = "xy", col_names = FALSE))
+y_test <- as.matrix(xy_test[,1])
+
+X_test <- as.matrix(xy_test[,22:144])
+```
 
 # Running the Simulation Analysis 
 
