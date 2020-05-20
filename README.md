@@ -3,7 +3,7 @@
 Simultaneous variable seletion and estimation of LUR models with spatiotemporally correlated errors that is scalable for big data
 
 # Citation
-coming soon ...
+https://arxiv.org/abs/2005.09210
 
 # Installation 
 Based on the package GPvecchia (https://cran.r-project.org/web/packages/GPvecchia/index.html) and
