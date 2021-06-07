@@ -363,6 +363,14 @@ negloglik_vecchia_ST=function(logparms,locs,res,vecchia.approx){
 
 
 ################################################################################
+# Spatial Vecchia negative loglikelihood
+################################################################################
+negloglik_vecchia=function(logparms,locs,res,vecchia.approx){
+  parms = exp(logparms)
+  -vecchia_likelihood(res, vecchia.approx, c(parms[1],parms[2], 0.5), parms[3] ) 
+}  
+
+################################################################################
 # Spatiotemporal Full Kriging negative loglikelihood
 ################################################################################
 negloglik_full_ST=function(logparms,locs,y,N){
