@@ -228,6 +228,128 @@ LURK_Full <- function(Y,X,locs,covparams = NULL,beta.hat = NULL, tol = NULL){
 }
 
 
+## LURK-Full Spatial Only with SCAD - No censoring ########################
+LURK_Full_Spatial <- function(Y,X,locs,covparams = NULL,beta.hat = NULL, tol = NULL,foldid = NULL,seed = NULL){
+  #
+  # censored = logical, 1=censored, 0 = observed
+  #
+  #
+  ############################################################## 
+  ### Specify default values for optional inputs  ##############
+  ############################################################## 
+  n <- length(Y)
+  if(is.null(covparams)){
+    d.sample <- sample(1:n,n/50,replace = FALSE)
+    D.sample = rdist(locs[d.sample,1:2])
+    covparams <- c(.9*var(Y[!censored]),mean(D.sample)/4,0.1*var(Y[!censored])) 
+  }  
+  if(is.null(beta.hat)){
+    beta.hat <- rep(0,ncol(X))
+  }
+  
+  if(is.null(tol)){
+    tol <- 0.999999
+  }
+  
+ 
+  
+  ############################################################## ######################
+  ### Initialize variables, including estimation of the censored values ##############
+  ############################################################################# 
+  # Initialize X*Beta
+  Y.hat <- as.matrix(X)%*%beta.hat
+  
+
+  Y.obs <- Y
+
+  ############################################################## 
+  ### Begining algorithm (Algorithm 1 from Messier and Katzfuss 2020, 
+  #      but for the Full model) 
+  ############################################################## 
+  converged=FALSE
+  prev.error=1e10
+  iterations = 1
+  while(!converged){
+    print(iterations)
+    # compute residuals
+    res= as.double(Y.obs-Y.hat)
+    
+    # estimate theta
+    full.result=optim(par=log(covparams),fn=negloglik_full_spatial,
+                      y=res,locs= locs,N=n,method = "Nelder-Mead",
+                      control=list(trace=0))
+    
+    
+    covparams <- exp(full.result$par)
+    # print(covparams)
+    LL.krig <- full.result$value
+    
+    # transform data to iid
+    Sigma.oo <- covparams[1]*Exponential(rdist(locs),
+                                         range=covparams[2])+covparams[3]*diag(n)
+    Omega.lc <- solve(t(chol(Sigma.oo)))
+    
+
+    # Calculate the  transformed X and Y
+    y.tilde <- Omega.lc %*% Y.obs
+    X.tilde <- Omega.lc %*% X
+    
+    
+    # Estimate betas - Full SCAD fitting
+    
+    Full.SCAD.fit=cv.ncvreg(as.matrix(X.tilde),y.tilde,family = "gaussian",
+                            penalty = "SCAD",dfmax=100,returnX = FALSE,seed = seed,fold = foldid)
+    
+    
+    
+    idmin <- which(Full.SCAD.fit$lambda == Full.SCAD.fit$lambda.min)
+    semin <- Full.SCAD.fit$cve[idmin] + Full.SCAD.fit$cvse[idmin]
+    lambda.1se <- max(Full.SCAD.fit$lambda[Full.SCAD.fit$cve<=semin])
+    lambda.1se.idx <- which(Full.SCAD.fit$lambda==lambda.1se)
+    
+    
+    ### Betas
+    beta.iter <- Full.SCAD.fit$fit$beta[-1,]
+    ### Lambdas
+    lambda.iter <- Full.SCAD.fit$fit$lambda
+    
+    ### Get SCAD penalty values
+    LL.full.beta <- SCAD_Penalty_Loglike(beta.iter,lambda.iter)
+    
+    ### Compute log-likelihood
+    LL.full.iter <- LL.krig + LL.full.beta[lambda.1se.idx]
+    # Min error (stopping criterion) is the log-likelihood
+    min.error=LL.full.iter
+    
+    ### Check min-error against the previous error and tolerance
+    if(min.error<prev.error*tol)
+    { prev.error=min.error
+    beta.hat <- Full.SCAD.fit$fit$beta[,lambda.1se.idx]
+    Y.hat <- predict(Full.SCAD.fit,X = X, which = lambda.1se.idx)
+    LL.Full <- LL.full.iter
+    covparams.iter <- covparams
+    Full.SCAD.iter <- Full.SCAD.fit
+    iterations <- iterations + 1
+    }else{
+      converged=TRUE 
+      beta.estimates<- beta.hat
+      covparams <- covparams.iter
+      Full.SCAD.fit <- Full.SCAD.iter
+      Y.hat <- predict(Full.SCAD.fit,X = X, which = lambda.1se.idx)
+    }
+    
+    
+    
+    ######
+  }#While (!converged) loop
+  
+  out.list <- list("covparams" = covparams,"beta" = beta.estimates,"lambda.1se.idx" = lambda.1se.idx, 
+                   "Full.SCAD.fit" = Full.SCAD.fit)
+  return(out.list)
+  
+}
+
+
 ################################################################################
 # Spatiotemporal Vecchia negative loglikelihood
 ################################################################################
@@ -252,6 +374,17 @@ negloglik_full_ST=function(logparms,locs,y,N){
   -mvtnorm::dmvnorm(y,rep(0,N),cov.mat,log=TRUE)
 }
 
+
+################################################################################
+# Spatial Full Kriging negative loglikelihood
+################################################################################
+negloglik_full_spatial=function(logparms,locs,y,N){
+  parms = exp(logparms)
+  d <- fields::rdist(locs)
+  cov.mat=parms[1]*fields::Exponential(d,range=parms[2])+
+    parms[3]*diag(N)
+  -mvtnorm::dmvnorm(y,rep(0,N),cov.mat,log=TRUE)
+}
 
 ################################################################################
 # SCAD Penalty value
